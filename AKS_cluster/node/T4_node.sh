@@ -1,0 +1,12 @@
+az aks nodepool add \
+  --resource-group AKS-resource-group \
+  --cluster-name AA-standard \
+  --name t4pool \
+  --mode User \
+  --os-sku Ubuntu \
+  --kubernetes-version 1.30.7 \
+  --node-vm-size Standard_NC4as_T4_v3 \
+  --enable-cluster-autoscaler \
+  --min-count 1 \
+  --max-count 5 \
+  --max-pods 30

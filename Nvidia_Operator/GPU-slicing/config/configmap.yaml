@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tf-script
+data:
+  ts_test.py: |
+    import tensorflow as tf
+    import time
+
+    # 檢查是否有可用的 GPU
+    gpus = tf.config.list_physical_devices('GPU')
+    if gpus:
+        print(f"可用的 GPU: {[gpu.name for gpu in gpus]}")
+    else:
+        print("未檢測到可用的 GPU，將使用 CPU。")
+
+    # 定義兩個向量
+    a = tf.constant([1.0, 2.0, 3.0], dtype=tf.float32)
+    b = tf.constant([4.0, 5.0, 6.0], dtype=tf.float32)
+
+    # 計算內積的函數
+    @tf.function
+    def compute_dot_product():
+        return tf.tensordot(a, b, axes=1)
+
+    # 計算持續運行 10 分鐘
+    start_time = time.time()
+    duration = 10 * 60  # 10 分鐘 (秒)
+
+    with tf.device('/GPU:0' if gpus else '/CPU:0'):
+        print("開始持續計算...")
+        while time.time() - start_time < duration:
+            result = compute_dot_product()
+
+    print("計算完成。")

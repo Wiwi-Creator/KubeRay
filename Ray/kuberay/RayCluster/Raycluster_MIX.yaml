@@ -1,0 +1,59 @@
+apiVersion: ray.io/v1alpha1
+kind: RayCluster
+metadata:
+  name: raycluster-poc
+spec:
+  rayVersion: "2.3.0"
+  enableInTreeAutoscaling: true  # 啟用 Autoscaler
+  headGroupSpec:
+    serviceType: LoadBalancer  # cluster IP , LoadBalancer, NodePort
+    rayStartParams:
+      dashboard-host: "0.0.0.0"  # Dashboard Host
+    template:  # Pod template
+      metadata:
+      spec: 
+        containers:
+        - name: ray-head
+          image: rayproject/ray-ml:2.3.0  # Ray Image
+          resources:
+            limits:
+              cpu: 4  # CPU limit
+              memory: 4Gi  # Memory limit
+            requests:
+              cpu: 4  # CPU request
+              memory: 4Gi  # Memory request
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "ray stop"]  # 停止 Ray
+          ports:
+          - containerPort: 6379
+            name: gcs
+          - containerPort: 8265
+            name: dashboard
+          - containerPort: 10001
+            name: client
+          - containerPort: 8000
+            name: serve
+  workerGroupSpecs:
+  - groupName: t4pool
+    replicas: 1
+    minReplicas: 1
+    maxReplicas: 2
+    rayStartParams:
+      num-cpus: "2"
+      num-gpus: "1"  # 每個 Job 請求 1 個 GPU
+    template:  # Pod template
+      spec:
+        containers:
+        - name: ray-worker
+          image: rayproject/ray-ml:2.3.0  # 使用 Ray Image
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+              cpu: 4
+              memory: 4Gi
+            requests:
+              nvidia.com/gpu: 1
+              cpu: 4
+              memory: 4Gi

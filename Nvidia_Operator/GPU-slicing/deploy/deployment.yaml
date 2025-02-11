@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tf-mixed-deployment
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: tf-mixed
+  template:
+    metadata:
+      labels:
+        app: tf-mixed
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: ${node_name}
+      containers:
+      - name: tf-mixed
+        image: tensorflow/tensorflow:latest 
+        #command: ["python", "/mnt/data/ts_test.py"]
+        command: ["python", "-c", "import tensorflow as tf; tf.config.list_physical_devices('GPU')"]
+        resources:
+          limits:
+            "nvidia.com/mig-1g.10gb": 1
+        volumeMounts:
+        - name: my-file-volume
+          mountPath: /mnt/data/ts_test.py
+          subPath: ts_test.py
+      volumes:
+      - name: my-file-volume
+        configMap:
+          name: tf-script

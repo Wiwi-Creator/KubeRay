@@ -1,0 +1,56 @@
+apiVersion: ray.io/v1alpha1
+kind: RayCluster
+metadata:
+  name: raycluster-poc
+spec:
+  rayVersion: "2.3.0"
+  enableInTreeAutoscaling: true  # 啟用 Autoscaler
+  headGroupSpec:
+    serviceType: LoadBalancer  # cluster IP , LoadBalancer, NodePort
+    rayStartParams:
+      dashboard-host: "0.0.0.0"  # Dashboard Host
+    template:  # Pod template
+      metadata:  # Pod Rawdata
+      spec: 
+        containers:
+        - name: ray-head
+          image: rayproject/ray-ml:2.3.0  # Ray Image
+          resources:
+            limits:
+              cpu: 2  # CPU limit
+              memory: 2Gi  # Memory limit
+            requests:
+              cpu: 2  # CPU request
+              memory: 2Gi  # Memory request
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "ray stop"]  # 停止 Ray
+          ports:
+          - containerPort: 6379
+            name: gcs
+          - containerPort: 8265
+            name: dashboard
+          - containerPort: 10001
+            name: client
+          - containerPort: 8000
+            name: serve
+  workerGroupSpecs:
+  - groupName: b4mpool
+    replicas: 1
+    minReplicas: 1
+    maxReplicas: 3
+    rayStartParams:
+      num-cpus: "2"
+    template:  # Pod template
+      spec:
+        containers:
+        - name: ray-worker
+          image: rayproject/ray-ml:2.3.0  # 使用 Ray Image
+          resources:
+            limits:
+              cpu: 2
+              memory: 2Gi
+            requests:
+              cpu: 2
+              memory: 2Gi

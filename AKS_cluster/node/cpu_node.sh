@@ -1,0 +1,12 @@
+az aks nodepool add \
+  --resource-group AKS-resource-group \
+  --cluster-name AA-standard \
+  --name b4mpool \
+  --mode User \
+  --os-sku Ubuntu \
+  --kubernetes-version 1.30.7 \
+  --node-vm-size Standard_B4ms \
+  --enable-cluster-autoscaler \
+  --min-count 1 \
+  --max-count 5 \
+  --max-pods 30
