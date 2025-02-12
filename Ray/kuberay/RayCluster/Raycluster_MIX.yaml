@@ -1,7 +1,7 @@
 apiVersion: ray.io/v1alpha1
 kind: RayCluster
 metadata:
-  name: raycluster-poc
+  name: raycluster-mix
 spec:
   rayVersion: "2.3.0"
   enableInTreeAutoscaling: true  # 啟用 Autoscaler
@@ -36,17 +36,37 @@ spec:
           - containerPort: 8000
             name: serve
   workerGroupSpecs:
+  - groupName: b4mpool
+    replicas: 2
+    minReplicas: 1
+    maxReplicas: 5
+    rayStartParams:
+      num-cpus: "2"
+      resources: '{"cpu_node": 1}'
+    template:
+      spec:
+        containers:
+        - name: ray-worker-cpu
+          image: rayproject/ray-ml:2.3.0
+          resources:
+            limits:
+              cpu: 2
+              memory: 4Gi
+            requests:
+              cpu: 2
+              memory: 4Gi
   - groupName: t4pool
     replicas: 1
     minReplicas: 1
     maxReplicas: 2
     rayStartParams:
       num-cpus: "2"
-      num-gpus: "1"  # 每個 Job 請求 1 個 GPU
+      num-gpus: "1"
+      resources: '{"gpu_node": 1}'
     template:  # Pod template
       spec:
         containers:
-        - name: ray-worker
+        - name: ray-worker-gpu
           image: rayproject/ray-ml:2.3.0  # 使用 Ray Image
           resources:
             limits:

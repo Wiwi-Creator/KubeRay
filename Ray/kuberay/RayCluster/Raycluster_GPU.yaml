@@ -1,7 +1,7 @@
 apiVersion: ray.io/v1alpha1
 kind: RayCluster
 metadata:
-  name: raycluster-poc
+  name: raycluster-gpu
 spec:
   rayVersion: "2.3.0"
   enableInTreeAutoscaling: true  # 啟用 Autoscaler
@@ -18,10 +18,10 @@ spec:
           resources:
             limits:
               cpu: 4  # CPU limit
-              memory: 4Gi  # Memory limit
+              memory: 8Gi  # Memory limit
             requests:
               cpu: 4  # CPU request
-              memory: 4Gi  # Memory request
+              memory: 8Gi  # Memory request
           lifecycle:
             preStop:
               exec:
@@ -39,9 +39,9 @@ spec:
   - groupName: t4pool
     replicas: 1
     minReplicas: 1
-    maxReplicas: 2
+    maxReplicas: 3
     rayStartParams:
-      num-cpus: "2"
+      num-cpus: "4"
       num-gpus: "1"  # 每個 Job 請求 1 個 GPU
     template:  # Pod template
       spec:
@@ -52,8 +52,8 @@ spec:
             limits:
               nvidia.com/gpu: 1
               cpu: 4
-              memory: 4Gi
+              memory: 8Gi
             requests:
               nvidia.com/gpu: 1
               cpu: 4
-              memory: 4Gi
+              memory: 8Gi

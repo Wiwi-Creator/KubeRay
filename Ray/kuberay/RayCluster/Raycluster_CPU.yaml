@@ -1,7 +1,7 @@
 apiVersion: ray.io/v1alpha1
 kind: RayCluster
 metadata:
-  name: raycluster-poc
+  name: raycluster-cpu
 spec:
   rayVersion: "2.3.0"
   enableInTreeAutoscaling: true  # 啟用 Autoscaler
